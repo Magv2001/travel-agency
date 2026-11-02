@@ -63,13 +63,30 @@ const getGooglePicture = async (accessToken: string) => {
 
 export const loginWithGoogle = async () => {
     try {
-        account.createOAuth2Session(
+        account.createOAuth2Token(
             OAuthProvider.Google,
-            `${window.location.origin}/`,
+            `${window.location.origin}/sign-in`,
             `${window.location.origin}/404`
         );
     } catch (error) {
-        console.error("Error during OAuth2 session creation:", error);
+        console.error("Error during OAuth2 token creation:", error);
+    }
+};
+
+export const completeOAuthLogin = async () => {
+    const params = new URLSearchParams(window.location.search);
+    const userId = params.get("userId");
+    const secret = params.get("secret");
+
+    if (!userId || !secret) return false;
+
+    try {
+        await account.createSession(userId, secret);
+        window.history.replaceState({}, "", window.location.pathname);
+        return true;
+    } catch (error) {
+        console.error("Error creating session:", error);
+        return false;
     }
 };
 
